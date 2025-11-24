@@ -21,7 +21,7 @@ export function usePinataUpload() {
       const result = await uploadMetadataToIPFS(metadata)
       return result
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Metadata upload failed"
+      const message = err instanceof Error ? err.message : "Upload failed"
       setError(message)
       return null
     } finally {
@@ -48,7 +48,7 @@ export function usePinataUpload() {
       }
 
       const arrayBuffer = await file.arrayBuffer()
-      const result = await uploadImageToIPFS(arrayBuffer, file.name, file.type)
+      const result = await uploadImageToIPFS(arrayBuffer, file.name)
 
       return result
     } catch (err) {

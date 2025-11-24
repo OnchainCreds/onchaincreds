@@ -6,33 +6,31 @@ interface PinataUploadResult {
   url: string
 }
 
-export async function uploadImageToIPFS(fileData: ArrayBuffer, fileName: string, mimeType: string = "image/png"): Promise<PinataUploadResult> {
+export async function uploadImageToIPFS(fileData: ArrayBuffer, fileName: string): Promise<PinataUploadResult> {
+  const PINATA_API_KEY = process.env.PINATA_API_KEY
+  const PINATA_SECRET_KEY = process.env.PINATA_SECRET_KEY
+
+  if (!PINATA_API_KEY || !PINATA_SECRET_KEY) {
+    throw new Error("Pinata credentials not configured")
+  }
+
   try {
-    const apiKey = process.env.PINATA_API_KEY
-    const secretKey = process.env.PINATA_SECRET_KEY
-
-    if (!apiKey || !secretKey) {
-      throw new Error("Pinata credentials not configured")
-    }
-
-    const uint8Array = new Uint8Array(fileData)
-    const blob = new Blob([uint8Array], { type: mimeType })
-    
     const formData = new FormData()
+    const blob = new Blob([fileData], { type: "image/png" })
     formData.append("file", blob, fileName)
 
     const response = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
       method: "POST",
       headers: {
-        pinata_api_key: apiKey,
-        pinata_secret_api_key: secretKey,
+        pinata_api_key: PINATA_API_KEY,
+        pinata_secret_api_key: PINATA_SECRET_KEY,
       },
       body: formData,
     })
 
     if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error(`Pinata error: ${response.status} - ${errorText}`)
+      const error = await response.text()
+      throw new Error(`Pinata upload failed: ${response.status} ${error}`)
     }
 
     const data = await response.json()
@@ -44,32 +42,32 @@ export async function uploadImageToIPFS(fileData: ArrayBuffer, fileName: string,
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : "Upload failed"
-    throw new Error(`Failed to upload image to IPFS: ${message}`)
+    throw new Error(`Failed to upload to Pinata: ${message}`)
   }
 }
 
 export async function uploadMetadataToIPFS(metadata: Record<string, any>): Promise<PinataUploadResult> {
+  const PINATA_API_KEY = process.env.PINATA_API_KEY
+  const PINATA_SECRET_KEY = process.env.PINATA_SECRET_KEY
+
+  if (!PINATA_API_KEY || !PINATA_SECRET_KEY) {
+    throw new Error("Pinata credentials not configured")
+  }
+
   try {
-    const apiKey = process.env.PINATA_API_KEY
-    const secretKey = process.env.PINATA_SECRET_KEY
-
-    if (!apiKey || !secretKey) {
-      throw new Error("Pinata credentials not configured")
-    }
-
     const response = await fetch("https://api.pinata.cloud/pinning/pinJSONToIPFS", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        pinata_api_key: apiKey,
-        pinata_secret_api_key: secretKey,
+        pinata_api_key: PINATA_API_KEY,
+        pinata_secret_api_key: PINATA_SECRET_KEY,
       },
       body: JSON.stringify(metadata),
     })
 
     if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error(`Pinata error: ${response.status} - ${errorText}`)
+      const error = await response.text()
+      throw new Error(`Pinata upload failed: ${response.status} ${error}`)
     }
 
     const data = await response.json()
@@ -81,6 +79,6 @@ export async function uploadMetadataToIPFS(metadata: Record<string, any>): Promi
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : "Upload failed"
-    throw new Error(`Failed to upload metadata to IPFS: ${message}`)
+    throw new Error(`Failed to upload metadata to Pinata: ${message}`)
   }
 }

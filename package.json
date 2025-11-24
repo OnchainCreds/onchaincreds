@@ -2,7 +2,7 @@
   "name": "onchain-creds",
   "version": "0.1.0",
   "private": true,
-  "description": "OnchainCreds - Decentralized credential verification and proofs protocol",
+  "description": "OnchainCreds - Mint and verify on-chain credentials powered by blockchain technology",
   "scripts": {
     "build": "next build",
     "dev": "next dev",

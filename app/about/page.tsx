@@ -3,12 +3,10 @@
 import { motion } from "framer-motion"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { ArrowRight, Shield, Zap, Globe } from 'lucide-react'
-import { useCredentialModal } from "@/components/credential-modal-provider"
+import Link from "next/link"
+import { ArrowRight, Shield, Zap, Globe } from "lucide-react"
 
 export default function AboutPage() {
-  const { openModal } = useCredentialModal()
-
   const values = [
     {
       icon: Shield,
@@ -24,34 +22,6 @@ export default function AboutPage() {
       icon: Globe,
       title: "Decentralization",
       description: "Fully decentralized protocol where users maintain complete ownership and control",
-    },
-  ]
-
-  const teamMembers = [
-    {
-      name: "MR COOL",
-      role: "CEO",
-      description: "Visionary leader driving the future of decentralized credentials",
-    },
-    {
-      name: "Community Lead",
-      role: "Community Lead",
-      description: "Building and nurturing our growing community",
-    },
-    {
-      name: "Development Lead",
-      role: "Development Lead",
-      description: "Leading technical innovation and protocol development",
-    },
-    {
-      name: "Project Manager",
-      role: "Project Manager",
-      description: "Coordinating execution and strategic initiatives",
-    },
-    {
-      name: "Developer",
-      role: "Developer",
-      description: "Contributing to core platform development",
     },
   ]
 
@@ -96,34 +66,6 @@ export default function AboutPage() {
                   </motion.div>
                 )
               })}
-            </div>
-          </motion.div>
-
-          {/* Team Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mb-16"
-          >
-            <h2 className="text-3xl font-bold mb-8">Our Team</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {teamMembers.map((member, index) => (
-                <motion.div
-                  key={member.role}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="p-6 rounded-lg border border-border bg-secondary/30 hover:border-primary/50 transition-all text-center"
-                >
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center">
-                    <span className="text-2xl font-bold text-primary">{member.name.charAt(0)}</span>
-                  </div>
-                  <h3 className="text-lg font-bold mb-1">{member.name}</h3>
-                  <p className="text-sm text-primary font-semibold mb-3">{member.role}</p>
-                  <p className="text-sm text-muted-foreground">{member.description}</p>
-                </motion.div>
-              ))}
             </div>
           </motion.div>
 
@@ -190,13 +132,13 @@ export default function AboutPage() {
             className="text-center p-8 rounded-lg border border-border bg-secondary/30"
           >
             <h3 className="text-2xl font-bold mb-4">Ready to Own Your Credentials?</h3>
-            <button
-              onClick={openModal}
+            <Link
+              href="/mint"
               className="inline-flex items-center gap-2 px-8 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:shadow-lg hover:shadow-primary/50 transition-all"
             >
               Start Minting Now
               <ArrowRight size={20} />
-            </button>
+            </Link>
           </motion.div>
         </div>
       </section>

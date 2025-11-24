@@ -3,26 +3,26 @@
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { usePathname } from 'next/navigation'
-import { Menu, X } from 'lucide-react'
+import { usePathname } from "next/navigation"
+import { Menu, X } from "lucide-react"
 import { motion } from "framer-motion"
 import { WalletButton } from "@/components/wallet-button"
-import { useCredentialModal } from "@/components/credential-modal-provider"
+import { CredentialTypeModal } from "@/components/credential-type-modal"
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const { openModal } = useCredentialModal()
+  const [isCredentialModalOpen, setIsCredentialModalOpen] = useState(false)
   const pathname = usePathname()
 
   const navItems = [
     { name: "Home", href: "/" },
+    { name: "Mint Credentials", href: "#", onClick: () => setIsCredentialModalOpen(true) },
+    { name: "Verify Credentials", href: "/verify" },
+    { name: "Templates", href: "/templates" },
     { name: "About", href: "/about" },
-    { name: "Developer", href: "/developer" },
-    { name: "Mint Credential", action: "mint" },
-    { name: "Verify Credential", href: "/verify" },
   ]
 
-  const isActive = (href: string | undefined) => href && pathname === href
+  const isActive = (href: string) => pathname === href
 
   return (
     <>
@@ -45,41 +45,25 @@ export function Header() {
             {/* Desktop Navigation */}
             <nav className="hidden md:flex gap-8">
               {navItems.map((item) => (
-                <div key={item.name}>
-                  {item.action === "mint" ? (
-                    <button
-                      onClick={openModal}
-                      className="relative text-sm font-medium transition-colors text-muted-foreground hover:text-foreground cursor-pointer"
-                    >
-                      {item.name}
-                    </button>
-                  ) : (
-                    <Link
-                      href={item.href || "#"}
-                      className={`relative text-sm font-medium transition-colors ${
-                        isActive(item.href)
-                          ? "text-primary"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      {item.name}
-                      {isActive(item.href) && (
-                        <motion.div layoutId="underline" className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary" />
-                      )}
-                    </Link>
+                <button
+                  key={item.name}
+                  onClick={item.onClick || (() => {})}
+                  className={`relative text-sm font-medium transition-colors ${
+                    item.href !== "#" && isActive(item.href)
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-foreground"
+                  } ${item.onClick ? "cursor-pointer" : ""}`}
+                >
+                  {item.href !== "#" ? <Link href={item.href}>{item.name}</Link> : item.name}
+                  {item.href !== "#" && isActive(item.href) && (
+                    <motion.div layoutId="underline" className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary" />
                   )}
-                </div>
+                </button>
               ))}
             </nav>
 
-            {/* Right side - Buttons */}
+            {/* Right side - Wallet Button */}
             <div className="flex items-center gap-4">
-              <button
-                onClick={openModal}
-                className="hidden sm:inline px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity"
-              >
-                Mint Credential
-              </button>
               <WalletButton />
 
               {/* Mobile Menu Toggle */}
@@ -101,36 +85,33 @@ export function Header() {
               className="md:hidden pb-4 border-t border-border"
             >
               {navItems.map((item) => (
-                <div key={item.name}>
-                  {item.action === "mint" ? (
-                    <button
-                      onClick={() => {
-                        openModal()
-                        setIsMenuOpen(false)
-                      }}
-                      className="w-full text-left px-4 py-3 text-sm transition-colors text-muted-foreground hover:text-foreground hover:bg-secondary cursor-pointer"
-                    >
-                      {item.name}
-                    </button>
-                  ) : (
-                    <Link
-                      href={item.href || "#"}
-                      onClick={() => setIsMenuOpen(false)}
-                      className={`w-full text-left px-4 py-3 text-sm transition-colors block ${
-                        isActive(item.href)
-                          ? "text-primary bg-primary/10 font-medium"
-                          : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                      }`}
-                    >
+                <button
+                  key={item.name}
+                  onClick={() => {
+                    item.onClick?.()
+                    setIsMenuOpen(false)
+                  }}
+                  className={`w-full text-left px-4 py-3 text-sm transition-colors ${
+                    item.href !== "#" && isActive(item.href)
+                      ? "text-primary bg-primary/10 font-medium"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  }`}
+                >
+                  {item.href !== "#" ? (
+                    <Link href={item.href} onClick={() => setIsMenuOpen(false)}>
                       {item.name}
                     </Link>
+                  ) : (
+                    item.name
                   )}
-                </div>
+                </button>
               ))}
             </motion.nav>
           )}
         </div>
       </header>
+
+      <CredentialTypeModal open={isCredentialModalOpen} onOpenChange={setIsCredentialModalOpen} />
     </>
   )
 }
