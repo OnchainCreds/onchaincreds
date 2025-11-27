@@ -8,28 +8,28 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "OnchainCreds | Blockchain Credential Verification Protocol",
+  title: "OnchainCreds | Decentralized Credential Verification",
   description:
-    "Own your credentials on-chain. A decentralized protocol for minting, verifying, and showcasing digital credentials with transparency.",
-  keywords: "blockchain, credentials, resume, NFT, Celo, verification, Web3",
+    "Mint verified professional credentials as on-chain NFTs. Self-attest your claims and maintain complete control over your digital identity through blockchain technology.",
+  keywords: "blockchain, credentials, verification, NFT, Celo, Web3, identity, decentralized",
   openGraph: {
-    title: "OnchainCreds | Own Your Credentials, On-Chain",
+    title: "OnchainCreds | Decentralized Credential Verification",
     description:
-      "A blockchain-powered protocol for minting, verifying, and showcasing digital credentials with transparency.",
+      "Mint verified professional credentials as on-chain NFTs with transparent claim verification.",
     type: "website",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "OnchainCreds Logo",
+        alt: "OnchainCreds",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     title: "OnchainCreds",
-    description: "Own your credentials on-chain",
+    description: "Verified credentials on-chain",
     images: ["/og-image.png"],
   },
   icons: {

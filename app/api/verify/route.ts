@@ -134,6 +134,80 @@ export async function POST(request: Request) {
         const errorMsg = err instanceof Error ? err.message : String(err)
         return Response.json({ error: `Failed to lookup address: ${errorMsg}` }, { status: 500 })
       }
+    } else if (searchType === "txHash") {
+      const txHash = query.trim()
+
+      try {
+        // Validate transaction hash format
+        if (!txHash.startsWith("0x") || txHash.length !== 66) {
+          return Response.json({ error: "Invalid transaction hash format" }, { status: 400 })
+        }
+
+        // Query the blockchain for transaction details
+        const provider = new ethers.JsonRpcProvider(CELO_RPC_URL)
+        const tx = await provider.getTransaction(txHash)
+
+        if (!tx) {
+          return Response.json({ error: "Transaction not found on the network" }, { status: 404 })
+        }
+
+        // Get the receipt to confirm it's a mint transaction
+        const receipt = await provider.getTransactionReceipt(txHash)
+
+        if (!receipt || !receipt.logs || receipt.logs.length === 0) {
+          return Response.json({ error: "Transaction is not a valid credential mint transaction" }, { status: 400 })
+        }
+
+        // Extract token ID from transaction logs (Transfer event)
+        let tokenId = null
+        for (const log of receipt.logs) {
+          try {
+            const iface = new ethers.Interface(MINET_ABI)
+            const parsedLog = iface.parseLog(log)
+            if (parsedLog?.name === "Transfer" && parsedLog?.args?.length >= 3) {
+              tokenId = parsedLog.args[2]?.toString()
+              break
+            }
+          } catch {
+            // Continue searching other logs
+          }
+        }
+
+        if (!tokenId) {
+          return Response.json({ error: "Could not extract credential from this transaction" }, { status: 400 })
+        }
+
+        // Fetch the credential details using the found token ID
+        const contract = new ethers.Contract(CONTRACT_CONFIG.address, MINET_ABI, provider)
+        const owner = await contract.ownerOf(tokenId)
+        const tokenURI = await contract.tokenURI(tokenId)
+
+        let metadata = null
+        try {
+          let ipfsUrl = tokenURI
+          if (tokenURI.startsWith("ipfs://")) {
+            ipfsUrl = tokenURI.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/")
+          }
+          const response = await fetch(ipfsUrl, { timeout: 10000 })
+          if (response.ok) {
+            metadata = await response.json()
+          }
+        } catch (err) {
+          // Metadata fetch failed, continue
+        }
+
+        credential = {
+          tokenId: tokenId.toString(),
+          owner,
+          transactionHash: txHash,
+          metadataUri: tokenURI,
+          metadata,
+          message: "Credential successfully verified from transaction",
+        }
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : String(err)
+        return Response.json({ error: `Failed to lookup transaction: ${errorMsg}` }, { status: 500 })
+      }
     }
 
     if (!credential) {

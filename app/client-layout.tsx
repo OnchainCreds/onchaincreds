@@ -1,6 +1,9 @@
 "use client"
 
 import { WalletProvider } from "@/components/wallet-provider"
+import { CredentialModalProvider } from "@/components/credential-modal-provider"
+import { useEffect } from "react"
+import { usePathname } from 'next/navigation'
 import React from "react"
 
 export function ClientLayout({
@@ -11,27 +14,22 @@ export function ClientLayout({
   return (
     <>
       <ScrollToTop />
-      <WalletProvider>{children}</WalletProvider>
+      <CredentialModalProvider>
+        <WalletProvider>{children}</WalletProvider>
+      </CredentialModalProvider>
     </>
   )
 }
 
 export default ClientLayout
 
-// Added component to handle scroll-to-top on navigation
+// Component to handle scroll-to-top on navigation
 function ScrollToTop() {
-  React.useEffect(() => {
-    const handleRouteChange = () => {
-      window.scrollTo(0, 0)
-    }
+  const pathname = usePathname()
 
-    // Scroll to top on mount and when location changes
+  useEffect(() => {
     window.scrollTo(0, 0)
-
-    // Listen for popstate (back/forward button)
-    window.addEventListener("popstate", handleRouteChange)
-    return () => window.removeEventListener("popstate", handleRouteChange)
-  }, [])
+  }, [pathname])
 
   return null
 }
